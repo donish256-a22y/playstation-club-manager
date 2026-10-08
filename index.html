@@ -1,0 +1,5681 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#080d14">
+
+<title>C1 PlayStation</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  min-height:100%;
+  background:#070b10;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+  padding-bottom:84px;
+  overflow-x:hidden;
+}
+
+/* =====================================================
+   BACKGROUND CONTROLLER
+===================================================== */
+
+body:before{
+  content:"";
+  position:fixed;
+  z-index:-3;
+  left:50%;
+  top:54%;
+  width:650px;
+  height:430px;
+  transform:translate(-50%,-50%) rotate(-7deg);
+  opacity:.045;
+
+  background:
+  radial-gradient(
+    ellipse at 50% 42%,
+    rgba(130,150,180,.9) 0 18%,
+    transparent 19%
+  ),
+  radial-gradient(
+    ellipse at 19% 54%,
+    rgba(130,150,180,.9) 0 18%,
+    transparent 19%
+  ),
+  radial-gradient(
+    ellipse at 81% 54%,
+    rgba(130,150,180,.9) 0 18%,
+    transparent 19%
+  );
+
+  border:32px solid rgba(130,150,180,.8);
+  border-top-width:48px;
+  border-bottom-width:48px;
+  border-radius:45% 45% 38% 38%;
+  filter:blur(1px);
+}
+
+body:after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  pointer-events:none;
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(30,80,120,.10),
+      transparent 45%
+    ),
+    linear-gradient(
+      rgba(7,11,16,.94),
+      rgba(7,11,16,.98)
+    );
+}
+
+/* =====================================================
+   BASIC
+===================================================== */
+
+button,input,select{
+  font:inherit;
+}
+
+button{
+  border:0;
+  cursor:pointer;
+}
+
+button:active{
+  transform:scale(.97);
+}
+
+.top{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:rgba(10,15,22,.97);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid #202936;
+  padding:11px 13px;
+}
+
+.top-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.logo{
+  font-size:20px;
+  font-weight:900;
+}
+
+.datetime{
+  text-align:right;
+}
+
+.clock{
+  font-size:16px;
+  font-weight:900;
+}
+
+.date{
+  font-size:10px;
+  color:#8591a1;
+  margin-top:2px;
+}
+
+.weather{
+  margin-top:9px;
+  background:#121a24;
+  border:1px solid #26313e;
+  border-radius:12px;
+  padding:8px 10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.weather-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.weather-icon{
+  font-size:25px;
+}
+
+.weather-city{
+  font-size:12px;
+  color:#9da8b6;
+}
+
+.weather-temp{
+  font-size:19px;
+  font-weight:900;
+}
+
+.sync{
+  margin-top:7px;
+  font-size:10px;
+  color:#6e7c8d;
+}
+
+.page{
+  display:none;
+  padding:12px;
+  max-width:1100px;
+  margin:auto;
+}
+
+.page.active{
+  display:block;
+}
+
+.title{
+  font-size:19px;
+  font-weight:900;
+  margin:5px 0 12px;
+}
+
+/* =====================================================
+   HOME
+===================================================== */
+
+.home-stats{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+}
+
+.home-stat{
+  background:rgba(18,25,35,.94);
+  border:1px solid #222d3a;
+  border-radius:14px;
+  padding:12px;
+}
+
+.home-stat.full{
+  grid-column:1/-1;
+}
+
+.home-label{
+  color:#8490a0;
+  font-size:11px;
+}
+
+.home-value{
+  margin-top:6px;
+  font-size:19px;
+  font-weight:900;
+}
+
+.home-profit{
+  color:#54dc8e;
+}
+
+/* =====================================================
+   ROOMS
+===================================================== */
+
+.rooms{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+
+.room{
+  position:relative;
+  min-height:185px;
+  background:rgba(18,25,35,.96);
+  border:1px solid #283340;
+  border-radius:15px;
+  padding:10px;
+  overflow:hidden;
+  box-shadow:0 8px 25px rgba(0,0,0,.15);
+}
+
+.room.free{
+  border-color:#167f4c;
+}
+
+.room.busy{
+  border-color:#9f3030;
+  box-shadow:
+    0 0 0 1px rgba(190,45,45,.08),
+    0 8px 25px rgba(0,0,0,.2);
+}
+
+.room-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:7px;
+}
+
+.room-title-area{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+.controller-icon{
+  width:35px;
+  height:35px;
+  border-radius:10px;
+  background:#202b38;
+  border:1px solid #354250;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  flex:none;
+  box-shadow:inset 0 0 12px rgba(255,255,255,.025);
+}
+
+.room-name{
+  font-size:15px;
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.room-type{
+  color:#7f8c9c;
+  font-size:10px;
+  margin-top:3px;
+}
+
+.room-menu{
+  width:29px;
+  height:29px;
+  border-radius:8px;
+  background:#222d39;
+  color:#fff;
+  font-size:18px;
+  flex:none;
+}
+
+/* STATUS */
+
+.room-status{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:8px;
+  font-size:10px;
+  font-weight:900;
+}
+
+.status-light{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  display:block;
+  flex:none;
+}
+
+.status-free{
+  background:#23d878;
+  box-shadow:0 0 9px rgba(35,216,120,.65);
+}
+
+.status-busy{
+  background:#ff3838;
+  box-shadow:0 0 12px rgba(255,56,56,.8);
+  animation:statusBlink 1s infinite;
+}
+
+@keyframes statusBlink{
+  0%,100%{
+    opacity:1;
+    box-shadow:0 0 12px rgba(255,56,56,.85);
+  }
+  50%{
+    opacity:.25;
+    box-shadow:0 0 3px rgba(255,56,56,.15);
+  }
+}
+
+.status-text-free{
+  color:#48dd8d;
+}
+
+.status-text-busy{
+  color:#ff6262;
+}
+
+/* LIVE */
+
+.room-live-box{
+  margin-top:7px;
+  background:#0d141c;
+  border:1px solid #202c38;
+  border-radius:9px;
+  padding:7px;
+}
+
+.room-live-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:10px;
+  color:#8794a3;
+  padding:2px 0;
+}
+
+.room-live-row b{
+  color:#fff;
+  font-size:11px;
+}
+
+.room-total-row{
+  margin-top:3px;
+  padding-top:5px !important;
+  border-top:1px solid #202c38;
+}
+
+.room-total-row b{
+  color:#61e29b;
+  font-size:14px;
+}
+
+/* START / ENTER */
+
+.room-button{
+  width:100%;
+  margin-top:8px;
+  min-height:38px;
+  border-radius:9px;
+  color:white;
+  font-weight:900;
+}
+
+.free-button{
+  background:#159657;
+  box-shadow:0 0 13px rgba(21,150,87,.35);
+}
+
+.busy-button{
+  background:#293745;
+  border:1px solid #3c4c5c;
+  animation:none;
+}
+
+.room-button:active{
+  transform:scale(.97);
+}
+
+.add-room{
+  min-height:185px;
+  border:1px dashed #354250;
+  border-radius:14px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  color:#8c98a8;
+  font-weight:800;
+  background:rgba(12,18,25,.7);
+}
+
+/* =====================================================
+   ROOM SCREEN
+===================================================== */
+
+.back{
+  background:#202b38;
+  color:white;
+  padding:9px 12px;
+  border-radius:9px;
+}
+
+.room-screen-title{
+  text-align:center;
+  margin-top:8px;
+}
+
+.opened{
+  font-size:11px;
+  color:#8995a5;
+}
+
+.screen-room-name{
+  font-size:21px;
+  font-weight:900;
+  margin-top:2px;
+}
+
+.big-timer{
+  text-align:center;
+  font-size:38px;
+  font-weight:900;
+  letter-spacing:1px;
+  margin-top:8px;
+}
+
+.big-money{
+  text-align:center;
+  font-size:25px;
+  font-weight:900;
+  color:#61e29b;
+  margin-top:2px;
+}
+
+.price-line{
+  text-align:center;
+  font-size:11px;
+  color:#8793a2;
+  margin-top:3px;
+}
+
+.screen-box{
+  background:#111923;
+  border:1px solid #25303c;
+  border-radius:13px;
+  padding:9px;
+  margin-top:9px;
+}
+
+.screen-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:6px 0;
+  border-bottom:1px solid #222c37;
+  font-size:12px;
+}
+
+.screen-row:last-child{
+  border-bottom:0;
+}
+
+.screen-row b{
+  font-size:14px;
+}
+
+.control{
+  width:100%;
+  min-height:42px;
+  border-radius:10px;
+  color:white;
+  font-weight:900;
+}
+
+.controls{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin-top:8px;
+}
+
+.pause{
+  background:#b16a18;
+}
+
+.change{
+  background:#315d9f;
+}
+
+.bar-add{
+  background:#178653;
+}
+
+.finish{
+  background:#b83232;
+}
+
+.section{
+  font-size:15px;
+  font-weight:900;
+  margin:13px 0 7px;
+}
+
+/* =====================================================
+   SESSION PRODUCTS
+===================================================== */
+
+.session-product{
+  background:#111923;
+  border:1px solid #25303d;
+  border-radius:11px;
+  padding:8px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:6px;
+}
+
+.session-product-img{
+  width:42px;
+  height:42px;
+  object-fit:cover;
+  border-radius:8px;
+  background:#202b38;
+}
+
+.session-product-info{
+  flex:1;
+  min-width:0;
+}
+
+.session-product-name{
+  font-weight:900;
+  font-size:12px;
+}
+
+.session-product-detail{
+  font-size:10px;
+  color:#909cab;
+  margin-top:3px;
+}
+
+.qty-controls{
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+
+.qty-btn{
+  width:29px;
+  height:29px;
+  border-radius:8px;
+  background:#283442;
+  color:#fff;
+  font-size:17px;
+  font-weight:900;
+}
+
+.qty-number{
+  min-width:22px;
+  text-align:center;
+  font-size:14px;
+  font-weight:900;
+}
+
+/* =====================================================
+   BAR
+===================================================== */
+
+.add-product{
+  width:100%;
+  min-height:43px;
+  border-radius:10px;
+  background:#168852;
+  color:#fff;
+  font-weight:900;
+  margin-bottom:10px;
+}
+
+.products{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+
+.product{
+  background:#121923;
+  border:1px solid #26313e;
+  border-radius:13px;
+  padding:9px;
+}
+
+.product-top{
+  display:flex;
+  gap:8px;
+}
+
+.product-img{
+  width:47px;
+  height:47px;
+  border-radius:9px;
+  object-fit:cover;
+  background:#202b38;
+}
+
+.product-main{
+  flex:1;
+  min-width:0;
+}
+
+.product-name{
+  font-size:13px;
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.product-price{
+  font-size:10px;
+  color:#9ba6b4;
+  margin-top:3px;
+}
+
+.stock-dot{
+  width:35px;
+  height:35px;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:11px;
+  font-weight:900;
+  flex:none;
+}
+
+.stock-green{
+  background:#126c43;
+  color:#7affb2;
+}
+
+.stock-yellow{
+  background:#76560e;
+  color:#ffe184;
+}
+
+.stock-red{
+  background:#762626;
+  color:#ff8585;
+}
+
+.product-profit{
+  margin-top:7px;
+  font-size:11px;
+  color:#54db8d;
+}
+
+.product-actions{
+  display:flex;
+  gap:5px;
+  margin-top:8px;
+}
+
+.product-action{
+  flex:1;
+  min-height:32px;
+  border-radius:8px;
+  background:#263341;
+  color:#fff;
+  font-size:11px;
+  font-weight:900;
+}
+
+.edit{
+  background:#315a91;
+}
+
+.delete{
+  background:#813030;
+}
+
+/* =====================================================
+   REPORT
+===================================================== */
+
+.report-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+}
+
+.report-card{
+  background:#121923;
+  border:1px solid #26313d;
+  border-radius:13px;
+  padding:12px;
+}
+
+.report-label{
+  font-size:10px;
+  color:#8490a0;
+}
+
+.report-number{
+  font-size:18px;
+  font-weight:900;
+  margin-top:5px;
+}
+
+/* DAILY REPORT CARD */
+
+.daily-report-card{
+  margin-top:12px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(49,93,159,.22),
+      rgba(18,25,35,.97)
+    );
+  border:1px solid #315d9f;
+  border-radius:15px;
+  padding:13px;
+  cursor:pointer;
+}
+
+.daily-report-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.daily-report-icon{
+  width:43px;
+  height:43px;
+  border-radius:11px;
+  background:#315d9f;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+}
+
+.daily-report-title{
+  flex:1;
+  margin-left:10px;
+}
+
+.daily-report-title b{
+  display:block;
+  font-size:14px;
+}
+
+.daily-report-title span{
+  display:block;
+  margin-top:3px;
+  font-size:10px;
+  color:#8794a3;
+}
+
+.daily-report-arrow{
+  font-size:22px;
+  color:#7eaae8;
+}
+
+.daily-report-mini{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+  margin-top:10px;
+}
+
+.daily-mini{
+  background:#0d141c;
+  border:1px solid #202c38;
+  border-radius:8px;
+  padding:7px;
+  text-align:center;
+}
+
+.daily-mini span{
+  display:block;
+  color:#7d8998;
+  font-size:9px;
+}
+
+.daily-mini b{
+  display:block;
+  font-size:11px;
+  margin-top:3px;
+}
+
+/* =====================================================
+   NAV
+===================================================== */
+
+.bottom{
+  position:fixed;
+  z-index:100;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:6px 7px calc(7px + env(safe-area-inset-bottom));
+  background:rgba(10,15,22,.98);
+  backdrop-filter:blur(15px);
+  border-top:1px solid #202936;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+}
+
+.nav{
+  background:transparent;
+  color:#7f8b9b;
+  border-radius:10px;
+  padding:6px 2px;
+  font-size:9px;
+}
+
+.nav.active{
+  background:#202b38;
+  color:#fff;
+}
+
+.nav-icon{
+  display:block;
+  font-size:18px;
+  margin-bottom:2px;
+}
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  background:rgba(0,0,0,.73);
+  display:none;
+  align-items:flex-end;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-box{
+  width:100%;
+  max-width:650px;
+  margin:auto;
+  background:#121923;
+  border:1px solid #26313e;
+  border-radius:19px 19px 0 0;
+  padding:15px;
+  max-height:91vh;
+  overflow:auto;
+}
+
+.modal-title{
+  font-size:18px;
+  font-weight:900;
+  margin-bottom:12px;
+}
+
+.form{
+  display:grid;
+  gap:8px;
+}
+
+.input{
+  width:100%;
+  min-height:42px;
+  background:#0c1219;
+  color:#fff;
+  border:1px solid #293542;
+  border-radius:10px;
+  padding:10px;
+  outline:none;
+}
+
+.modal-btn{
+  width:100%;
+  min-height:42px;
+  border-radius:10px;
+  color:#fff;
+  font-weight:900;
+  background:#273442;
+}
+
+.green-btn{
+  background:#168651;
+}
+
+.red-btn{
+  background:#a73232;
+}
+
+.blue-btn{
+  background:#315d9c;
+}
+
+.empty{
+  padding:25px 10px;
+  text-align:center;
+  color:#778392;
+  font-size:12px;
+}
+
+.toast{
+  position:fixed;
+  z-index:300;
+  left:50%;
+  bottom:92px;
+  transform:translateX(-50%);
+  background:#202b38;
+  color:white;
+  padding:10px 14px;
+  border-radius:10px;
+  font-size:12px;
+  display:none;
+  box-shadow:0 8px 30px rgba(0,0,0,.5);
+  max-width:90%;
+  text-align:center;
+}
+
+.toast.show{
+  display:block;
+}
+
+.receipt-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+
+/* =====================================================
+   DESKTOP
+===================================================== */
+
+@media(min-width:700px){
+
+  .rooms{
+    grid-template-columns:repeat(4,1fr);
+  }
+
+  .products{
+    grid-template-columns:repeat(4,1fr);
+  }
+
+  .home-stats{
+    grid-template-columns:repeat(4,1fr);
+  }
+
+  .home-stat.full{
+    grid-column:auto;
+  }
+
+  .report-grid{
+    grid-template-columns:repeat(4,1fr);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="top">
+
+  <div class="top-row">
+
+    <div>
+      <div class="logo">🎮 C1 PlayStation</div>
+
+      <div class="sync" id="syncStatus">
+        Базага уланмоқда...
+      </div>
+    </div>
+
+    <div class="datetime">
+      <div class="clock" id="clock">
+        00:00:00
+      </div>
+
+      <div class="date" id="date"></div>
+    </div>
+
+  </div>
+
+  <div class="weather">
+
+    <div class="weather-left">
+
+      <div class="weather-icon" id="weatherIcon">
+        🌤️
+      </div>
+
+      <div>
+        <div class="weather-city">
+          Бухоро
+        </div>
+
+        <div
+          style="font-size:11px;color:#a1acba"
+          id="weatherText"
+        >
+          Об-ҳаво юкланмоқда...
+        </div>
+      </div>
+
+    </div>
+
+    <div
+      class="weather-temp"
+      id="weatherTemp"
+    >
+      --°
+    </div>
+
+  </div>
+
+</header>
+
+
+<!-- =====================================================
+     HOME
+===================================================== -->
+
+<section id="home" class="page active">
+
+  <div class="title">
+    Бугун
+  </div>
+
+  <div class="home-stats">
+
+    <div class="home-stat full">
+
+      <div class="home-label">
+        Бугунги тушум
+      </div>
+
+      <div
+        class="home-value"
+        id="homeRevenue"
+      >
+        0 сўм
+      </div>
+
+    </div>
+
+    <div class="home-stat">
+
+      <div class="home-label">
+        🔴 Банд хоналар
+      </div>
+
+      <div
+        class="home-value"
+        id="homeBusy"
+      >
+        0
+      </div>
+
+    </div>
+
+    <div class="home-stat">
+
+      <div class="home-label">
+        🥤 Бар
+      </div>
+
+      <div
+        class="home-value"
+        id="homeBar"
+      >
+        0 сўм
+      </div>
+
+    </div>
+
+    <div class="home-stat full">
+
+      <div class="home-label">
+        💚 Соф фойда
+      </div>
+
+      <div
+        class="home-value home-profit"
+        id="homeProfit"
+      >
+        0 сўм
+      </div>
+
+    </div>
+
+  </div>
+
+  <div
+    class="title"
+    style="margin-top:18px"
+  >
+    Ҳозирги хоналар
+  </div>
+
+  <div id="homeRooms"></div>
+
+</section>
+
+
+<!-- =====================================================
+     PLAYSTATION
+===================================================== -->
+
+<section
+  id="playstation"
+  class="page"
+>
+
+  <div class="title">
+    🎮 PlayStation хоналари
+  </div>
+
+  <div id="rooms" class="rooms"></div>
+
+</section>
+
+
+<!-- =====================================================
+     ROOM SCREEN
+===================================================== -->
+
+<section
+  id="roomScreen"
+  class="page"
+>
+
+  <button
+    class="back"
+    onclick="goBackRooms()"
+  >
+    ← Хоналар
+  </button>
+
+  <div class="room-screen-title">
+
+    <div
+      class="opened"
+      id="openedTime"
+    >
+      Очиш вақти: --
+    </div>
+
+    <div
+      class="screen-room-name"
+      id="screenRoomName"
+    >
+      Хона
+    </div>
+
+  </div>
+
+  <div
+    class="big-timer"
+    id="bigTimer"
+  >
+    00:00:00
+  </div>
+
+  <div
+    class="big-money"
+    id="bigTotal"
+  >
+    0 сўм
+  </div>
+
+  <div
+    class="price-line"
+    id="screenPrice"
+  >
+    0 сўм / соат
+  </div>
+
+  <div class="screen-box">
+
+    <div class="screen-row">
+      <span>🎮 Хона</span>
+      <b id="screenRoomMoney">0</b>
+    </div>
+
+    <div class="screen-row">
+      <span>🥤 Бар</span>
+      <b id="screenBarMoney">0</b>
+    </div>
+
+    <div class="screen-row">
+      <span>💰 Жами</span>
+      <b id="screenTotalMoney">0</b>
+    </div>
+
+  </div>
+
+  <div class="controls">
+
+    <button
+      class="control pause"
+      id="pauseBtn"
+      onclick="togglePause()"
+    >
+      ⏸ Пауза
+    </button>
+
+    <button
+      class="control change"
+      onclick="changeRoom()"
+    >
+      🔁 Хонани алмаштириш
+    </button>
+
+  </div>
+
+  <button
+    class="control bar-add"
+    style="margin-top:7px"
+    onclick="openRoomBar()"
+  >
+    🥤 Бардан маҳсулот қўшиш
+  </button>
+
+  <div class="section">
+    Олинган маҳсулотлар
+  </div>
+
+  <div id="sessionProducts"></div>
+
+  <button
+    class="control finish"
+    style="margin-top:9px"
+    onclick="finishRoom()"
+  >
+    🏁 ЯКУНЛАШ
+  </button>
+
+</section>
+
+
+<!-- =====================================================
+     BAR
+===================================================== -->
+
+<section id="bar" class="page">
+
+  <div class="title">
+    🥤 Бар
+  </div>
+
+  <button
+    class="add-product"
+    onclick="openProductModal()"
+  >
+    ＋ Маҳсулот қўшиш
+  </button>
+
+  <div
+    id="products"
+    class="products"
+  ></div>
+
+</section>
+
+
+<!-- =====================================================
+     REPORT
+===================================================== -->
+
+<section id="report" class="page">
+
+  <div class="title">
+    📊 Ҳисобот
+  </div>
+
+  <div class="report-grid">
+
+    <div class="report-card">
+      <div class="report-label">
+        Тушум
+      </div>
+
+      <div
+        class="report-number"
+        id="rRevenue"
+      >
+        0
+      </div>
+    </div>
+
+    <div class="report-card">
+      <div class="report-label">
+        PlayStation
+      </div>
+
+      <div
+        class="report-number"
+        id="rPS"
+      >
+        0
+      </div>
+    </div>
+
+    <div class="report-card">
+      <div class="report-label">
+        Бар
+      </div>
+
+      <div
+        class="report-number"
+        id="rBar"
+      >
+        0
+      </div>
+    </div>
+
+    <div class="report-card">
+      <div class="report-label">
+        Соф фойда
+      </div>
+
+      <div
+        class="report-number"
+        id="rProfit"
+      >
+        0
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DAILY REPORT -->
+
+  <div
+    class="daily-report-card"
+    onclick="openDailyReport()"
+  >
+
+    <div class="daily-report-top">
+
+      <div class="daily-report-icon">
+        📊
+      </div>
+
+      <div class="daily-report-title">
+
+        <b>
+          Кунлик ҳисобот
+        </b>
+
+        <span>
+          Бугунги барча тушум ва хоналар
+        </span>
+
+      </div>
+
+      <div class="daily-report-arrow">
+        ›
+      </div>
+
+    </div>
+
+    <div class="daily-report-mini">
+
+      <div class="daily-mini">
+        <span>Хоналар</span>
+        <b id="dailyRoomsCount">0</b>
+      </div>
+
+      <div class="daily-mini">
+        <span>Тушум</span>
+        <b id="dailyRevenueMini">0</b>
+      </div>
+
+      <div class="daily-mini">
+        <span>Фойда</span>
+        <b id="dailyProfitMini">0</b>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div
+    class="title"
+    style="margin-top:18px"
+  >
+    Якунланган хоналар
+  </div>
+
+  <div id="reportsList"></div>
+
+</section>
+
+
+<!-- =====================================================
+     SETTINGS
+===================================================== -->
+
+<section
+  id="settings"
+  class="page"
+>
+
+  <div class="title">
+    ⚙️ Созламалар
+  </div>
+
+  <div class="screen-box">
+
+    <div class="screen-row">
+      <span>База</span>
+      <b>Supabase</b>
+    </div>
+
+    <div class="screen-row">
+      <span>Синхронлаш</span>
+      <b>ON</b>
+    </div>
+
+    <div class="screen-row">
+      <span>Тизим</span>
+      <b>C1 PlayStation</b>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     PRODUCT MODAL
+===================================================== -->
+
+<div
+  id="productModal"
+  class="modal"
+>
+
+  <div class="modal-box">
+
+    <div class="modal-title">
+      <span id="productModalTitle">
+        Маҳсулот қўшиш
+      </span>
+    </div>
+
+    <div class="form">
+
+      <input
+        id="pName"
+        class="input"
+        placeholder="Маҳсулот номи"
+      >
+
+      <input
+        id="pBuy"
+        class="input"
+        type="number"
+        placeholder="Сотиб олиш нархи"
+      >
+
+      <input
+        id="pSell"
+        class="input"
+        type="number"
+        placeholder="Сотиладиган нархи"
+      >
+
+      <input
+        id="pStock"
+        class="input"
+        type="number"
+        placeholder="Сони"
+      >
+
+      <input
+        id="pImage"
+        class="input"
+        placeholder="Расм URL (ихтиёрий)"
+      >
+
+      <button
+        class="modal-btn green-btn"
+        onclick="saveProduct()"
+      >
+        💾 Сақлаш
+      </button>
+
+      <button
+        class="modal-btn"
+        onclick="closeProductModal()"
+      >
+        Бекор қилиш
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     ROOM MODAL
+===================================================== -->
+
+<div
+  id="roomModal"
+  class="modal"
+>
+
+  <div class="modal-box">
+
+    <div class="modal-title">
+      Хона созламалари
+    </div>
+
+    <div class="form">
+
+      <input
+        id="roomNameInput"
+        class="input"
+        placeholder="Хона номи"
+      >
+
+      <select
+        id="roomTypeInput"
+        class="input"
+      >
+        <option value="PS4">PS4</option>
+        <option value="PS3">PS3</option>
+        <option value="PS5">PS5</option>
+      </select>
+
+      <input
+        id="roomPriceInput"
+        class="input"
+        type="number"
+        placeholder="1 соат нархи"
+      >
+
+      <button
+        class="modal-btn green-btn"
+        onclick="saveRoom()"
+      >
+        Сақлаш
+      </button>
+
+      <button
+        class="modal-btn red-btn"
+        onclick="deleteRoom()"
+      >
+        Хонани ўчириш
+      </button>
+
+      <button
+        class="modal-btn"
+        onclick="closeRoomModal()"
+      >
+        Бекор қилиш
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     ROOM BAR MODAL
+===================================================== -->
+
+<div
+  id="roomBarModal"
+  class="modal"
+>
+
+  <div class="modal-box">
+
+    <div class="modal-title">
+      🥤 Бардан маҳсулот олиш
+    </div>
+
+    <div
+      id="roomProducts"
+      class="products"
+    ></div>
+
+    <div style="height:9px"></div>
+
+    <button
+      class="modal-btn"
+      onclick="closeRoomBar()"
+    >
+      Ёпиш
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     CHANGE ROOM MODAL
+===================================================== -->
+
+<div
+  id="changeRoomModal"
+  class="modal"
+>
+
+  <div class="modal-box">
+
+    <div class="modal-title">
+      🔁 Хонани алмаштириш
+    </div>
+
+    <div id="availableRooms"></div>
+
+    <div style="height:8px"></div>
+
+    <button
+      class="modal-btn"
+      onclick="closeChangeRoom()"
+    >
+      Бекор қилиш
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     PAYMENT MODAL
+===================================================== -->
+
+<div
+  id="paymentModal"
+  class="modal"
+>
+
+  <div class="modal-box">
+
+    <div class="modal-title">
+      💰 Тўлов
+    </div>
+
+    <div
+      id="finishSummary"
+      class="screen-box"
+    ></div>
+
+    <div
+      class="receipt-actions"
+      style="margin-top:9px"
+    >
+
+      <button
+        class="modal-btn green-btn"
+        onclick="completeFinish('cash')"
+      >
+        💵 НАҚД
+      </button>
+
+      <button
+        class="modal-btn blue-btn"
+        onclick="completeFinish('card')"
+      >
+        💳 ПЛАСТИК
+      </button>
+
+    </div>
+
+    <button
+      class="modal-btn"
+      style="margin-top:7px"
+      onclick="closePaymentModal()"
+    >
+      Бекор қилиш
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     DAILY REPORT MODAL
+===================================================== -->
+
+<div
+  id="dailyReportModal"
+  class="modal"
+>
+
+  <div class="modal-box">
+
+    <div class="modal-title">
+      📊 Кунлик ҳисобот
+    </div>
+
+    <div id="dailyReportContent"></div>
+
+    <button
+      class="modal-btn"
+      style="margin-top:10px"
+      onclick="closeDailyReport()"
+    >
+      Ёпиш
+    </button>
+
+  </div>
+
+</div>
+
+
+<div
+  id="toast"
+  class="toast"
+></div>
+
+
+<!-- =====================================================
+     NAV
+===================================================== -->
+
+<nav class="bottom">
+
+  <button
+    class="nav active"
+    data-page="home"
+    onclick="showPage('home')"
+  >
+    <span class="nav-icon">🏠</span>
+    Бош саҳифа
+  </button>
+
+  <button
+    class="nav"
+    data-page="playstation"
+    onclick="showPage('playstation')"
+  >
+    <span class="nav-icon">🎮</span>
+    PlayStation
+  </button>
+
+  <button
+    class="nav"
+    data-page="bar"
+    onclick="showPage('bar')"
+  >
+    <span class="nav-icon">🥤</span>
+    Бар
+  </button>
+
+  <button
+    class="nav"
+    data-page="report"
+    onclick="showPage('report')"
+  >
+    <span class="nav-icon">📊</span>
+    Ҳисобот
+  </button>
+
+  <button
+    class="nav"
+    data-page="settings"
+    onclick="showPage('settings')"
+  >
+    <span class="nav-icon">⚙️</span>
+    Созлама
+  </button>
+
+</nav>
+
+
+<script>
+
+/* =====================================================
+   SUPABASE
+===================================================== */
+
+const SUPABASE_URL =
+"https://wjqdyutaekcgnhwpfywe.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_uiKxBsXglSx7_orRgq13ow_LNXe4SYc";
+
+const db =
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+/* =====================================================
+   STATE
+===================================================== */
+
+let rooms = [];
+let products = [];
+let sessions = [];
+
+let currentRoom = null;
+let currentSession = null;
+let currentSessionProducts = [];
+
+let editingProduct = null;
+let editingRoom = null;
+
+let finishData = null;
+
+
+/* =====================================================
+   BASIC
+===================================================== */
+
+function money(n){
+
+  return Number(n || 0)
+    .toLocaleString("uz-UZ") +
+    " сўм";
+}
+
+
+function esc(v){
+
+  return String(v ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+
+function toast(text){
+
+  const el =
+    document.getElementById("toast");
+
+  el.textContent = text;
+
+  el.classList.add("show");
+
+  setTimeout(()=>{
+    el.classList.remove("show");
+  },1800);
+}
+
+
+function formatTime(sec){
+
+  sec =
+    Math.max(
+      0,
+      Math.floor(Number(sec || 0))
+    );
+
+  const h =
+    Math.floor(sec / 3600);
+
+  const m =
+    Math.floor(
+      (sec % 3600) / 60
+    );
+
+  const s =
+    sec % 60;
+
+  return (
+    String(h).padStart(2,"0") +
+    ":" +
+    String(m).padStart(2,"0") +
+    ":" +
+    String(s).padStart(2,"0")
+  );
+}
+
+
+/* =====================================================
+   DATE
+===================================================== */
+
+function startOfToday(){
+
+  const d = new Date();
+
+  d.setHours(0,0,0,0);
+
+  return d;
+}
+
+
+/* =====================================================
+   CLOCK
+===================================================== */
+
+function updateClock(){
+
+  const now =
+    new Date();
+
+  document.getElementById("clock")
+    .textContent =
+    now.toLocaleTimeString(
+      "uz-UZ",
+      {
+        hour:"2-digit",
+        minute:"2-digit",
+        second:"2-digit"
+      }
+    );
+
+  document.getElementById("date")
+    .textContent =
+    now.toLocaleDateString(
+      "uz-UZ",
+      {
+        weekday:"short",
+        day:"2-digit",
+        month:"2-digit",
+        year:"numeric"
+      }
+    );
+}
+
+setInterval(
+  updateClock,
+  1000
+);
+
+updateClock();
+
+
+/* =====================================================
+   WEATHER
+===================================================== */
+
+async function loadWeather(){
+
+  try{
+
+    const url =
+      "https://api.open-meteo.com/v1/forecast" +
+      "?latitude=39.7747" +
+      "&longitude=64.4286" +
+      "&current=temperature_2m,weather_code" +
+      "&timezone=Asia%2FTashkent";
+
+    const res =
+      await fetch(url);
+
+    const data =
+      await res.json();
+
+    const temp =
+      Math.round(
+        Number(
+          data.current.temperature_2m
+        )
+      );
+
+    const code =
+      Number(
+        data.current.weather_code
+      );
+
+    let icon = "🌤️";
+    let text = "Ochiq";
+
+    if(code === 0){
+      icon = "☀️";
+      text = "Ochiq havo";
+    }
+    else if(code <= 3){
+      icon = "🌤️";
+      text = "Bulutli";
+    }
+    else if(code <= 48){
+      icon = "🌫️";
+      text = "Tuman";
+    }
+    else if(code <= 67){
+      icon = "🌧️";
+      text = "Yomg‘ir";
+    }
+    else if(code <= 77){
+      icon = "❄️";
+      text = "Qor";
+    }
+    else if(code <= 82){
+      icon = "🌧️";
+      text = "Yomg‘ir";
+    }
+    else{
+      icon = "⛈️";
+      text = "Momaqaldiroq";
+    }
+
+    document.getElementById("weatherTemp")
+      .textContent =
+      temp + "°";
+
+    document.getElementById("weatherIcon")
+      .textContent =
+      icon;
+
+    document.getElementById("weatherText")
+      .textContent =
+      text;
+
+  }catch(e){
+
+    document.getElementById("weatherTemp")
+      .textContent =
+      "--°";
+
+    document.getElementById("weatherText")
+      .textContent =
+      "Об-ҳаво мавжуд эмас";
+  }
+}
+
+loadWeather();
+
+setInterval(
+  loadWeather,
+  15 * 60 * 1000
+);
+
+
+/* =====================================================
+   PAGE
+===================================================== */
+
+function showPage(page){
+
+  document
+    .querySelectorAll(".page")
+    .forEach(x=>{
+      x.classList.remove("active");
+    });
+
+  const target =
+    document.getElementById(page);
+
+  if(target){
+    target.classList.add("active");
+  }
+
+  document
+    .querySelectorAll(".nav")
+    .forEach(x=>{
+      x.classList.toggle(
+        "active",
+        x.dataset.page === page
+      );
+    });
+
+  if(page === "home"){
+    renderHome();
+  }
+
+  if(page === "playstation"){
+    renderRooms();
+  }
+
+  if(page === "bar"){
+    renderProducts();
+  }
+
+  if(page === "report"){
+    renderReports();
+  }
+}
+
+
+/* =====================================================
+   LOAD DATABASE
+===================================================== */
+
+async function loadData(){
+
+  try{
+
+    const [
+      roomRes,
+      productRes,
+      sessionRes
+    ] =
+    await Promise.all([
+
+      db
+        .from("rooms")
+        .select("*")
+        .order("id"),
+
+      db
+        .from("products")
+        .select("*")
+        .order("id"),
+
+      db
+        .from("sessions")
+        .select("*")
+        .order("id",{ascending:false})
+        .limit(500)
+
+    ]);
+
+    if(roomRes.error)
+      throw roomRes.error;
+
+    if(productRes.error)
+      throw productRes.error;
+
+    if(sessionRes.error)
+      throw sessionRes.error;
+
+    rooms =
+      roomRes.data || [];
+
+    products =
+      productRes.data || [];
+
+    sessions =
+      sessionRes.data || [];
+
+    document.getElementById("syncStatus")
+      .textContent =
+      "🟢 База уланган";
+
+    renderHome();
+    renderRooms();
+    renderProducts();
+    renderReports();
+
+    if(
+      currentSession &&
+      currentRoom
+    ){
+
+      const s =
+        sessions.find(
+          x =>
+          Number(x.id) ===
+          Number(currentSession.id)
+        );
+
+      if(
+        !s ||
+        s.status !== "active"
+      ){
+
+        currentSession = null;
+        currentRoom = null;
+        currentSessionProducts = [];
+
+        showPage("playstation");
+
+      }else{
+
+        currentSession = s;
+
+        const r =
+          rooms.find(
+            x =>
+            Number(x.id) ===
+            Number(s.room_id)
+          );
+
+        if(r){
+          currentRoom = r;
+        }
+
+      }
+    }
+
+  }catch(error){
+
+    console.error(error);
+
+    document.getElementById("syncStatus")
+      .textContent =
+      "🔴 База хатоси";
+  }
+}
+
+
+/* =====================================================
+   ACTIVE SESSION
+===================================================== */
+
+function activeSession(roomId){
+
+  return sessions.find(
+    s =>
+      Number(s.room_id) ===
+      Number(roomId) &&
+      s.status === "active"
+  );
+}
+
+
+/* =====================================================
+   ELAPSED
+===================================================== */
+
+function elapsedSeconds(session){
+
+  if(!session)
+    return 0;
+
+  const start =
+    new Date(
+      session.start_time
+    ).getTime();
+
+  let sec =
+    Math.floor(
+      (Date.now() - start) / 1000
+    );
+
+  let paused =
+    Number(
+      session.paused_seconds || 0
+    );
+
+  if(
+    session.paused &&
+    session.pause_started_at
+  ){
+
+    paused +=
+      Math.floor(
+        (
+          Date.now() -
+          new Date(
+            session.pause_started_at
+          ).getTime()
+        ) / 1000
+      );
+  }
+
+  return Math.max(
+    0,
+    sec - paused
+  );
+}
+
+
+/* =====================================================
+   SECOND PRICE
+===================================================== */
+
+function roomAmount(session,room){
+
+  if(!session || !room)
+    return 0;
+
+  const seconds =
+    elapsedSeconds(session);
+
+  const hourly =
+    Number(
+      room.price_per_hour || 0
+    );
+
+  return Math.floor(
+    hourly *
+    seconds /
+    3600
+  );
+}
+
+
+/* =====================================================
+   SESSION BAR
+===================================================== */
+
+async function loadSessionProducts(){
+
+  if(!currentSession){
+
+    currentSessionProducts = [];
+
+    return;
+  }
+
+  const {data,error} =
+    await db
+      .from("session_products")
+      .select(`
+        *,
+        products(
+          id,
+          name,
+          sell_price,
+          buy_price,
+          image,
+          stock
+        )
+      `)
+      .eq(
+        "session_id",
+        currentSession.id
+      )
+      .order("id");
+
+  if(error){
+
+    console.error(error);
+
+    currentSessionProducts = [];
+
+    return;
+  }
+
+  currentSessionProducts =
+    data || [];
+}
+
+
+/* =====================================================
+   BAR AMOUNT
+===================================================== */
+
+function sessionBarAmount(){
+
+  return currentSessionProducts
+    .reduce(
+      (sum,x)=>
+        sum +
+        Number(
+          x.total ||
+          (
+            Number(x.quantity || 0) *
+            Number(x.price || 0)
+          )
+        ),
+      0
+    );
+}
+
+
+/* =====================================================
+   BAR PROFIT
+===================================================== */
+
+function sessionBarProfit(){
+
+  return currentSessionProducts
+    .reduce(
+      (sum,x)=>{
+
+        const qty =
+          Number(x.quantity || 0);
+
+        const sell =
+          Number(x.price || 0);
+
+        const buy =
+          Number(
+            x.buy_price ??
+            x.products?.buy_price ??
+            0
+          );
+
+        return sum +
+          ((sell-buy)*qty);
+
+      },
+      0
+    );
+}
+
+
+/* =====================================================
+   RENDER HOME
+===================================================== */
+
+function renderHome(){
+
+  const today =
+    sessions.filter(
+      s =>
+        s.status === "finished" &&
+        s.end_time &&
+        new Date(s.end_time) >=
+        startOfToday()
+    );
+
+  const revenue =
+    today.reduce(
+      (sum,s)=>
+        sum +
+        Number(s.total_amount || 0),
+      0
+    );
+
+  const bar =
+    today.reduce(
+      (sum,s)=>
+        sum +
+        Number(s.bar_amount || 0),
+      0
+    );
+
+  const profit =
+    today.reduce(
+      (sum,s)=>
+        sum +
+        Number(s.room_amount || 0) +
+        Number(s.bar_profit || 0),
+      0
+    );
+
+  const busy =
+    rooms.filter(
+      r =>
+      !!activeSession(r.id)
+    ).length;
+
+  document.getElementById("homeRevenue")
+    .textContent =
+    money(revenue);
+
+  document.getElementById("homeBusy")
+    .textContent =
+    busy;
+
+  document.getElementById("homeBar")
+    .textContent =
+    money(bar);
+
+  document.getElementById("homeProfit")
+    .textContent =
+    money(profit);
+
+  const box =
+    document.getElementById("homeRooms");
+
+  const active =
+    rooms.filter(
+      r =>
+      !!activeSession(r.id)
+    );
+
+  if(!active.length){
+
+    box.innerHTML =
+      `<div class="empty">
+        Ҳозирча банд хона йўқ
+      </div>`;
+
+    return;
+  }
+
+  box.innerHTML =
+    active.map(r=>{
+
+      const s =
+        activeSession(r.id);
+
+      const rm =
+        roomAmount(s,r);
+
+      const bar =
+        sessionBarAmountForRoom(
+          s.id
+        );
+
+      return `
+        <div
+          class="room busy"
+          style="margin-bottom:7px"
+          onclick="openRoom(${r.id})"
+        >
+
+          <div class="room-head">
+
+            <div class="room-title-area">
+
+              <div class="controller-icon">
+                🎮
+              </div>
+
+              <div>
+                <div class="room-name">
+                  ${esc(r.name)}
+                </div>
+
+                <div class="room-type">
+                  ${esc(r.type || "PS4")}
+                </div>
+              </div>
+
+            </div>
+
+            <div class="room-status">
+
+              <span class="status-light status-busy"></span>
+
+              <span class="status-text-busy">
+                БАНД
+              </span>
+
+            </div>
+
+          </div>
+
+          <div class="room-live-box">
+
+            <div class="room-live-row">
+              <span>⏱ Вақт</span>
+
+              <b data-room-time="${r.id}">
+                ${formatTime(
+                  elapsedSeconds(s)
+                )}
+              </b>
+            </div>
+
+            <div class="room-live-row">
+              <span>🎮 Хона</span>
+              <b data-room-money="${r.id}">
+                ${money(rm)}
+              </b>
+            </div>
+
+            <div class="room-live-row">
+              <span>🥤 Бар</span>
+              <b data-room-bar="${r.id}">
+                ${money(bar)}
+              </b>
+            </div>
+
+            <div class="room-live-row room-total-row">
+              <span>💰 Жами</span>
+
+              <b data-room-total="${r.id}">
+                ${money(rm + bar)}
+              </b>
+            </div>
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+}
+
+
+/* =====================================================
+   SESSION BAR BY ROOM
+===================================================== */
+
+async function sessionBarAmountFromDB(sessionId){
+
+  const {data,error} =
+    await db
+      .from("session_products")
+      .select("quantity,price,total")
+      .eq(
+        "session_id",
+        sessionId
+      );
+
+  if(error || !data)
+    return 0;
+
+  return data.reduce(
+    (sum,x)=>
+      sum +
+      Number(
+        x.total ||
+        Number(x.quantity || 0) *
+        Number(x.price || 0)
+      ),
+    0
+  );
+}
+
+
+/*
+  Home realtime rendering учун локал cache.
+*/
+function sessionBarAmountForRoom(sessionId){
+
+  if(
+    currentSession &&
+    Number(currentSession.id) ===
+    Number(sessionId)
+  ){
+    return sessionBarAmount();
+  }
+
+  return 0;
+}
+
+
+/* =====================================================
+   RENDER ROOMS
+===================================================== */
+
+function renderRooms(){
+
+  const box =
+    document.getElementById("rooms");
+
+  if(!box)
+    return;
+
+  let html = "";
+
+  rooms.forEach(room=>{
+
+    const s =
+      activeSession(room.id);
+
+    const busy =
+      !!s;
+
+    const rm =
+      busy
+      ? roomAmount(s,room)
+      : 0;
+
+    html += `
+
+      <div
+        class="room ${busy ? "busy":"free"}"
+      >
+
+        <div class="room-head">
+
+          <div class="room-title-area">
+
+            <div class="controller-icon">
+              🎮
+            </div>
+
+            <div>
+
+              <div class="room-name">
+                ${esc(room.name)}
+              </div>
+
+              <div class="room-type">
+                ${esc(room.type || "PS4")}
+                •
+                ${money(room.price_per_hour)}
+                /соат
+              </div>
+
+            </div>
+
+          </div>
+
+          <button
+            class="room-menu"
+            onclick="roomMenu(event,${room.id})"
+          >
+            ⋮
+          </button>
+
+        </div>
+
+
+        <div class="room-status">
+
+          ${
+            busy
+            ?
+            `
+              <span class="status-light status-busy"></span>
+
+              <span class="status-text-busy">
+                БАНД
+              </span>
+            `
+            :
+            `
+              <span class="status-light status-free"></span>
+
+              <span class="status-text-free">
+                БЎШ
+              </span>
+            `
+          }
+
+        </div>
+
+
+        ${
+          busy
+          ?
+          `
+
+            <div class="room-live-box">
+
+              <div class="room-live-row">
+
+                <span>
+                  ⏱ Вақт
+                </span>
+
+                <b data-room-time="${room.id}">
+                  ${formatTime(
+                    elapsedSeconds(s)
+                  )}
+                </b>
+
+              </div>
+
+              <div class="room-live-row">
+
+                <span>
+                  🎮 Хона
+                </span>
+
+                <b data-room-money="${room.id}">
+                  ${money(rm)}
+                </b>
+
+              </div>
+
+              <div class="room-live-row">
+
+                <span>
+                  🥤 Бар
+                </span>
+
+                <b data-room-bar="${room.id}">
+                  0 сўм
+                </b>
+
+              </div>
+
+              <div class="room-live-row room-total-row">
+
+                <span>
+                  💰 Жами
+                </span>
+
+                <b data-room-total="${room.id}">
+                  ${money(rm)}
+                </b>
+
+              </div>
+
+            </div>
+
+            <button
+              class="room-button busy-button"
+              onclick="openRoom(${room.id})"
+            >
+              🎮 КИРИШ
+            </button>
+
+          `
+          :
+          `
+
+            <button
+              class="room-button free-button"
+              onclick="startRoom(${room.id})"
+            >
+              ▶️ БОШЛАШ
+            </button>
+
+          `
+        }
+
+      </div>
+    `;
+  });
+
+
+  html += `
+
+    <div
+      class="add-room"
+      onclick="addRoom()"
+    >
+      ＋<br>
+      Хона қўшиш
+    </div>
+
+  `;
+
+  box.innerHTML =
+    html;
+
+  /*
+    Бар суммасини ҳар бир актив хона учун
+    алоҳида олиб кўрсатамиз.
+  */
+  updateAllRoomCards();
+}
+
+
+/* =====================================================
+   UPDATE ROOM CARDS
+===================================================== */
+
+async function updateAllRoomCards(){
+
+  for(const room of rooms){
+
+    const s =
+      activeSession(room.id);
+
+    if(!s)
+      continue;
+
+    const rm =
+      roomAmount(s,room);
+
+    const bar =
+      await sessionBarAmountFromDB(
+        s.id
+      );
+
+    const total =
+      rm + bar;
+
+    document
+      .querySelectorAll(
+        `[data-room-time="${room.id}"]`
+      )
+      .forEach(el=>{
+        el.textContent =
+          formatTime(
+            elapsedSeconds(s)
+          );
+      });
+
+    document
+      .querySelectorAll(
+        `[data-room-money="${room.id}"]`
+      )
+      .forEach(el=>{
+        el.textContent =
+          money(rm);
+      });
+
+    document
+      .querySelectorAll(
+        `[data-room-bar="${room.id}"]`
+      )
+      .forEach(el=>{
+        el.textContent =
+          money(bar);
+      });
+
+    document
+      .querySelectorAll(
+        `[data-room-total="${room.id}"]`
+      )
+      .forEach(el=>{
+        el.textContent =
+          money(total);
+      });
+  }
+}
+
+
+/* =====================================================
+   START ROOM
+===================================================== */
+
+async function startRoom(roomId){
+
+  const room =
+    rooms.find(
+      r =>
+      Number(r.id) ===
+      Number(roomId)
+    );
+
+  if(!room)
+    return;
+
+  if(activeSession(room.id)){
+
+    openRoom(room.id);
+
+    return;
+  }
+
+  const {data,error} =
+    await db
+      .from("sessions")
+      .insert({
+
+        room_id:room.id,
+
+        start_time:
+          new Date().toISOString(),
+
+        status:"active",
+
+        total_time:0,
+
+        room_amount:0,
+
+        bar_amount:0,
+
+        total_amount:0,
+
+        paused:false,
+
+        pause_started_at:null,
+
+        paused_seconds:0
+
+      })
+      .select()
+      .single();
+
+  if(error){
+
+    toast(
+      "Хона очилмади: " +
+      error.message
+    );
+
+    return;
+  }
+
+  await db
+    .from("rooms")
+    .update({
+      status:"busy"
+    })
+    .eq(
+      "id",
+      room.id
+    );
+
+  currentRoom =
+    room;
+
+  currentSession =
+    data;
+
+  currentSessionProducts = [];
+
+  await loadData();
+
+  showPage("roomScreen");
+
+  await loadSessionProducts();
+
+  renderRoomScreen();
+
+  toast(
+    room.name +
+    " бошланди"
+  );
+}
+
+
+/* =====================================================
+   OPEN ROOM
+===================================================== */
+
+async function openRoom(roomId){
+
+  const room =
+    rooms.find(
+      r =>
+      Number(r.id) ===
+      Number(roomId)
+    );
+
+  if(!room)
+    return;
+
+  const session =
+    activeSession(room.id);
+
+  if(!session){
+
+    startRoom(room.id);
+
+    return;
+  }
+
+  currentRoom =
+    room;
+
+  currentSession =
+    session;
+
+  await loadSessionProducts();
+
+  showPage("roomScreen");
+
+  renderRoomScreen();
+}
+
+
+/* =====================================================
+   ROOM SCREEN
+===================================================== */
+
+function renderRoomScreen(){
+
+  if(
+    !currentRoom ||
+    !currentSession
+  )
+    return;
+
+  document.getElementById(
+    "screenRoomName"
+  ).textContent =
+    currentRoom.name +
+    " • " +
+    currentRoom.type;
+
+  const started =
+    new Date(
+      currentSession.start_time
+    );
+
+  document.getElementById(
+    "openedTime"
+  ).textContent =
+    "Очиш вақти: " +
+    started.toLocaleTimeString(
+      "uz-UZ",
+      {
+        hour:"2-digit",
+        minute:"2-digit"
+      }
+    );
+
+  document.getElementById(
+    "screenPrice"
+  ).textContent =
+    money(
+      currentRoom.price_per_hour
+    ) +
+    " / соат";
+
+  updateRoomScreen();
+
+  renderSessionProducts();
+
+  const btn =
+    document.getElementById("pauseBtn");
+
+  if(currentSession.paused){
+
+    btn.textContent =
+      "▶️ Давом эттириш";
+
+    btn.style.background =
+      "#168651";
+
+  }else{
+
+    btn.textContent =
+      "⏸ Пауза";
+
+    btn.style.background =
+      "#b16a18";
+  }
+}
+
+
+/* =====================================================
+   LIVE ROOM SCREEN
+===================================================== */
+
+function updateRoomScreen(){
+
+  if(
+    !currentRoom ||
+    !currentSession
+  )
+    return;
+
+  const sec =
+    elapsedSeconds(
+      currentSession
+    );
+
+  const rm =
+    roomAmount(
+      currentSession,
+      currentRoom
+    );
+
+  const bar =
+    sessionBarAmount();
+
+  const total =
+    rm + bar;
+
+  document.getElementById(
+    "bigTimer"
+  ).textContent =
+    formatTime(sec);
+
+  document.getElementById(
+    "bigTotal"
+  ).textContent =
+    money(total);
+
+  document.getElementById(
+    "screenRoomMoney"
+  ).textContent =
+    money(rm);
+
+  document.getElementById(
+    "screenBarMoney"
+  ).textContent =
+    money(bar);
+
+  document.getElementById(
+    "screenTotalMoney"
+  ).textContent =
+    money(total);
+}
+
+
+/* =====================================================
+   SESSION PRODUCTS
+===================================================== */
+
+function renderSessionProducts(){
+
+  const box =
+    document.getElementById(
+      "sessionProducts"
+    );
+
+  if(!currentSessionProducts.length){
+
+    box.innerHTML =
+      `<div class="empty">
+        Бардан ҳали маҳсулот олинмаган
+      </div>`;
+
+    return;
+  }
+
+  box.innerHTML =
+    currentSessionProducts.map(item=>{
+
+      const p =
+        item.products || {};
+
+      const img =
+        p.image ||
+        "";
+
+      return `
+
+        <div class="session-product">
+
+          ${
+            img
+            ?
+            `
+              <img
+                class="session-product-img"
+                src="${esc(img)}"
+                onerror="this.style.display='none'"
+              >
+            `
+            :
+            `
+              <div
+                class="session-product-img"
+                style="
+                  display:flex;
+                  align-items:center;
+                  justify-content:center;
+                  font-size:19px;
+                "
+              >
+                🥤
+              </div>
+            `
+          }
+
+          <div class="session-product-info">
+
+            <div class="session-product-name">
+              ${esc(
+                p.name ||
+                "Маҳсулот"
+              )}
+            </div>
+
+            <div class="session-product-detail">
+              ${item.quantity} ×
+              ${money(item.price)}
+              =
+              ${money(item.total)}
+            </div>
+
+          </div>
+
+          <div class="qty-controls">
+
+            <button
+              class="qty-btn"
+              onclick="changeSessionProduct(${item.product_id},-1)"
+            >
+              −
+            </button>
+
+            <div class="qty-number">
+              ${item.quantity}
+            </div>
+
+            <button
+              class="qty-btn"
+              onclick="changeSessionProduct(${item.product_id},1)"
+            >
+              +
+            </button>
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+}
+
+
+/* =====================================================
+   ROOM BAR
+===================================================== */
+
+async function openRoomBar(){
+
+  await loadSessionProducts();
+
+  renderRoomProducts();
+
+  document
+    .getElementById("roomBarModal")
+    .classList.add("show");
+}
+
+
+function closeRoomBar(){
+
+  document
+    .getElementById("roomBarModal")
+    .classList.remove("show");
+}
+
+
+function renderRoomProducts(){
+
+  const box =
+    document.getElementById(
+      "roomProducts"
+    );
+
+  if(!products.length){
+
+    box.innerHTML =
+      `<div class="empty">
+        Барда маҳсулот йўқ
+      </div>`;
+
+    return;
+  }
+
+  box.innerHTML =
+    products.map(p=>{
+
+      const item =
+        currentSessionProducts.find(
+          x =>
+          Number(x.product_id) ===
+          Number(p.id)
+        );
+
+      const qty =
+        item
+        ? Number(item.quantity)
+        : 0;
+
+      const stock =
+        Number(p.stock || 0);
+
+      let cls =
+        "stock-green";
+
+      if(stock <= 5){
+        cls = "stock-red";
+      }
+      else if(stock <= 10){
+        cls = "stock-yellow";
+      }
+
+      const img =
+        p.image ||
+        "";
+
+      return `
+
+        <div class="product">
+
+          <div class="product-top">
+
+            ${
+              img
+              ?
+              `
+                <img
+                  class="product-img"
+                  src="${esc(img)}"
+                  onerror="this.style.display='none'"
+                >
+              `
+              :
+              `
+                <div
+                  class="product-img"
+                  style="
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:20px;
+                  "
+                >
+                  🥤
+                </div>
+              `
+            }
+
+            <div class="product-main">
+
+              <div class="product-name">
+                ${esc(p.name)}
+              </div>
+
+              <div class="product-price">
+                ${money(p.sell_price)}
+              </div>
+
+            </div>
+
+            <div
+              class="stock-dot ${cls}"
+            >
+              ${stock}
+            </div>
+
+          </div>
+
+          <div class="product-actions">
+
+            <button
+              class="product-action"
+              onclick="changeSessionProduct(${p.id},-1)"
+            >
+              −
+            </button>
+
+            <button
+              class="product-action"
+              style="background:#168651"
+            >
+              ${qty} дона
+            </button>
+
+            <button
+              class="product-action"
+              onclick="changeSessionProduct(${p.id},1)"
+            >
+              +
+            </button>
+
+          </div>
+
+        </div>
+
+      `;
+
+    }).join("");
+}
+
+
+/* =====================================================
+   SESSION PRODUCT CHANGE
+===================================================== */
+
+async function changeSessionProduct(
+  productId,
+  delta
+){
+
+  if(!currentSession)
+    return;
+
+  const p =
+    products.find(
+      x =>
+      Number(x.id) ===
+      Number(productId)
+    );
+
+  if(!p)
+    return;
+
+  const existing =
+    currentSessionProducts.find(
+      x =>
+      Number(x.product_id) ===
+      Number(productId)
+    );
+
+  const oldQty =
+    existing
+    ? Number(existing.quantity || 0)
+    : 0;
+
+  const newQty =
+    oldQty + delta;
+
+  if(newQty < 0)
+    return;
+
+
+  if(delta > 0){
+
+    if(
+      Number(p.stock || 0) <= 0
+    ){
+
+      toast(
+        "Омборда маҳсулот қолмаган"
+      );
+
+      return;
+    }
+
+    const {data,error} =
+      await db
+        .from("products")
+        .update({
+          stock:
+            Number(p.stock || 0)-1
+        })
+        .eq(
+          "id",
+          p.id
+        )
+        .select()
+        .single();
+
+    if(error){
+
+      toast("Омбор янгиланмади");
+
+      return;
+    }
+
+    p.stock =
+      Number(data.stock);
+  }
+
+
+  if(delta < 0){
+
+    if(oldQty <= 0)
+      return;
+
+    const {data,error} =
+      await db
+        .from("products")
+        .update({
+          stock:
+            Number(p.stock || 0)+1
+        })
+        .eq(
+          "id",
+          p.id
+        )
+        .select()
+        .single();
+
+    if(error){
+
+      toast("Омбор қайтарилмади");
+
+      return;
+    }
+
+    p.stock =
+      Number(data.stock);
+  }
+
+
+  if(newQty === 0){
+
+    if(existing){
+
+      await db
+        .from("session_products")
+        .delete()
+        .eq(
+          "id",
+          existing.id
+        );
+    }
+
+    currentSessionProducts =
+      currentSessionProducts.filter(
+        x =>
+        Number(x.product_id) !==
+        Number(productId)
+      );
+
+  }else{
+
+    const total =
+      newQty *
+      Number(p.sell_price || 0);
+
+    if(existing){
+
+      const {data,error} =
+        await db
+          .from("session_products")
+          .update({
+
+            quantity:newQty,
+
+            price:
+              Number(p.sell_price || 0),
+
+            buy_price:
+              Number(p.buy_price || 0),
+
+            total:total
+
+          })
+          .eq(
+            "id",
+            existing.id
+          )
+          .select()
+          .single();
+
+      if(error){
+
+        toast(
+          "Маҳсулот сақланмади"
+        );
+
+        return;
+      }
+
+      Object.assign(
+        existing,
+        data
+      );
+
+      existing.products =
+        p;
+
+    }else{
+
+      const {data,error} =
+        await db
+          .from("session_products")
+          .insert({
+
+            session_id:
+              currentSession.id,
+
+            product_id:
+              p.id,
+
+            quantity:
+              newQty,
+
+            price:
+              Number(p.sell_price || 0),
+
+            buy_price:
+              Number(p.buy_price || 0),
+
+            total:
+              total
+
+          })
+          .select()
+          .single();
+
+      if(error){
+
+        toast(
+          "Маҳсулот қўшилмади: " +
+          error.message
+        );
+
+        return;
+      }
+
+      currentSessionProducts.push({
+
+        ...data,
+
+        products:p
+
+      });
+    }
+  }
+
+  renderSessionProducts();
+
+  renderRoomProducts();
+
+  updateRoomScreen();
+
+  await updateAllRoomCards();
+}
+
+
+/* =====================================================
+   PAUSE
+===================================================== */
+
+async function togglePause(){
+
+  if(!currentSession)
+    return;
+
+  if(currentSession.paused){
+
+    let paused =
+      Number(
+        currentSession.paused_seconds || 0
+      );
+
+    if(
+      currentSession.pause_started_at
+    ){
+
+      paused +=
+        Math.floor(
+          (
+            Date.now() -
+            new Date(
+              currentSession.pause_started_at
+            ).getTime()
+          ) / 1000
+        );
+    }
+
+    const {data,error} =
+      await db
+        .from("sessions")
+        .update({
+
+          paused:false,
+
+          pause_started_at:null,
+
+          paused_seconds:paused
+
+        })
+        .eq(
+          "id",
+          currentSession.id
+        )
+        .select()
+        .single();
+
+    if(error){
+
+      toast("Пауза тугмади");
+
+      return;
+    }
+
+    currentSession =
+      data;
+
+  }else{
+
+    const {data,error} =
+      await db
+        .from("sessions")
+        .update({
+
+          paused:true,
+
+          pause_started_at:
+            new Date().toISOString()
+
+        })
+        .eq(
+          "id",
+          currentSession.id
+        )
+        .select()
+        .single();
+
+    if(error){
+
+      toast("Пауза ишламади");
+
+      return;
+    }
+
+    currentSession =
+      data;
+  }
+
+  renderRoomScreen();
+}
+
+
+/* =====================================================
+   CHANGE ROOM
+===================================================== */
+
+async function changeRoom(){
+
+  const available =
+    rooms.filter(
+      r =>
+      Number(r.id) !==
+      Number(currentRoom.id) &&
+      !activeSession(r.id)
+    );
+
+  const box =
+    document.getElementById(
+      "availableRooms"
+    );
+
+  if(!available.length){
+
+    box.innerHTML =
+      `<div class="empty">
+        Бўш хона йўқ
+      </div>`;
+
+  }else{
+
+    box.innerHTML =
+      available.map(r=>`
+
+        <button
+          class="modal-btn green-btn"
+          style="margin-bottom:6px"
+          onclick="doChangeRoom(${r.id})"
+        >
+          🎮 ${esc(r.name)}
+          •
+          ${esc(r.type)}
+        </button>
+
+      `).join("");
+  }
+
+  document
+    .getElementById(
+      "changeRoomModal"
+    )
+    .classList.add("show");
+}
+
+
+function closeChangeRoom(){
+
+  document
+    .getElementById(
+      "changeRoomModal"
+    )
+    .classList.remove("show");
+}
+
+
+async function doChangeRoom(
+  newRoomId
+){
+
+  if(
+    !currentSession ||
+    !currentRoom
+  )
+    return;
+
+  const newRoom =
+    rooms.find(
+      r =>
+      Number(r.id) ===
+      Number(newRoomId)
+    );
+
+  if(!newRoom)
+    return;
+
+  const oldRoom =
+    currentRoom;
+
+  const {data,error} =
+    await db
+      .from("sessions")
+      .update({
+        room_id:newRoom.id
+      })
+      .eq(
+        "id",
+        currentSession.id
+      )
+      .select()
+      .single();
+
+  if(error){
+
+    toast("Хона алмашмади");
+
+    return;
+  }
+
+  await db
+    .from("rooms")
+    .update({
+      status:"free"
+    })
+    .eq(
+      "id",
+      oldRoom.id
+    );
+
+  await db
+    .from("rooms")
+    .update({
+      status:"busy"
+    })
+    .eq(
+      "id",
+      newRoom.id
+    );
+
+  currentRoom =
+    newRoom;
+
+  currentSession =
+    data;
+
+  closeChangeRoom();
+
+  await loadData();
+
+  renderRoomScreen();
+
+  toast(
+    "Хона алмаштирилди"
+  );
+}
+
+
+/* =====================================================
+   FINISH
+===================================================== */
+
+async function finishRoom(){
+
+  if(
+    !currentRoom ||
+    !currentSession
+  )
+    return;
+
+  const rm =
+    roomAmount(
+      currentSession,
+      currentRoom
+    );
+
+  const bar =
+    sessionBarAmount();
+
+  const profit =
+    sessionBarProfit();
+
+  const total =
+    rm + bar;
+
+  finishData = {
+
+    roomAmount:rm,
+
+    barAmount:bar,
+
+    profit:profit,
+
+    total:total,
+
+    seconds:
+      elapsedSeconds(
+        currentSession
+      ),
+
+    room:currentRoom,
+
+    session:currentSession,
+
+    products:[
+      ...currentSessionProducts
+    ]
+
+  };
+
+  document.getElementById(
+    "finishSummary"
+  ).innerHTML = `
+
+    <div class="screen-row">
+      <span>Хона</span>
+      <b>${money(rm)}</b>
+    </div>
+
+    <div class="screen-row">
+      <span>Бар</span>
+      <b>${money(bar)}</b>
+    </div>
+
+    <div class="screen-row">
+      <span>Соф фойда</span>
+      <b style="color:#54dc8d">
+        ${money(rm + profit)}
+      </b>
+    </div>
+
+    <div class="screen-row">
+      <span>Жами</span>
+      <b>${money(total)}</b>
+    </div>
+
+    <div class="screen-row">
+      <span>Вақт</span>
+      <b>${formatTime(finishData.seconds)}</b>
+    </div>
+
+  `;
+
+  document
+    .getElementById(
+      "paymentModal"
+    )
+    .classList.add("show");
+}
+
+
+function closePaymentModal(){
+
+  document
+    .getElementById(
+      "paymentModal"
+    )
+    .classList.remove("show");
+
+  finishData = null;
+}
+
+
+/* =====================================================
+   COMPLETE FINISH
+===================================================== */
+
+async function completeFinish(
+  paymentMethod
+){
+
+  if(!finishData)
+    return;
+
+  const f =
+    finishData;
+
+  const {data,error} =
+    await db
+      .from("sessions")
+      .update({
+
+        end_time:
+          new Date().toISOString(),
+
+        total_time:
+          f.seconds,
+
+        room_amount:
+          f.roomAmount,
+
+        bar_amount:
+          f.barAmount,
+
+        total_amount:
+          f.total,
+
+        bar_profit:
+          f.profit,
+
+        status:
+          "finished",
+
+        paused:false,
+
+        pause_started_at:null
+
+      })
+      .eq(
+        "id",
+        f.session.id
+      )
+      .select()
+      .single();
+
+  if(error){
+
+    const {error:error2} =
+      await db
+        .from("sessions")
+        .update({
+
+          end_time:
+            new Date().toISOString(),
+
+          total_time:
+            f.seconds,
+
+          room_amount:
+            f.roomAmount,
+
+          bar_amount:
+            f.barAmount,
+
+          total_amount:
+            f.total,
+
+          status:
+            "finished",
+
+          paused:false,
+
+          pause_started_at:null
+
+        })
+        .eq(
+          "id",
+          f.session.id
+        )
+        .select()
+        .single();
+
+    if(error2){
+
+      toast(
+        "Якунлашда хато: " +
+        error2.message
+      );
+
+      return;
+    }
+  }
+
+
+  const {error:payError} =
+    await db
+      .from("payments")
+      .insert({
+
+        session_id:
+          f.session.id,
+
+        amount:
+          f.total,
+
+        payment_method:
+          paymentMethod
+
+      });
+
+  if(payError){
+
+    toast(
+      "Тўлов сақланмади: " +
+      payError.message
+    );
+
+    return;
+  }
+
+
+  await db
+    .from("rooms")
+    .update({
+      status:"free"
+    })
+    .eq(
+      "id",
+      f.room.id
+    );
+
+
+  closePaymentModal();
+
+  printReceipt(
+    f,
+    paymentMethod
+  );
+
+  currentRoom = null;
+  currentSession = null;
+  currentSessionProducts = [];
+
+  await loadData();
+
+  showPage("playstation");
+
+  toast(
+    "Хона муваффақиятли якунланди"
+  );
+}
+
+
+/* =====================================================
+   RECEIPT
+===================================================== */
+
+function printReceipt(
+  f,
+  paymentMethod
+){
+
+  const w =
+    window.open(
+      "",
+      "_blank",
+      "width=430,height=720"
+    );
+
+  if(!w){
+
+    toast(
+      "Чек ойнасини очишга рухсат берилмади"
+    );
+
+    return;
+  }
+
+  let rows = "";
+
+  f.products.forEach(x=>{
+
+    rows += `
+
+      <tr>
+
+        <td>
+          ${esc(
+            x.products?.name ||
+            "Маҳсулот"
+          )}
+        </td>
+
+        <td>
+          ${x.quantity}
+        </td>
+
+        <td>
+          ${money(x.total)}
+        </td>
+
+      </tr>
+
+    `;
+
+  });
+
+
+  w.document.write(`
+
+    <!DOCTYPE html>
+
+    <html>
+
+    <head>
+
+      <meta charset="UTF-8">
+
+      <title>C1 Chek</title>
+
+      <style>
+
+        body{
+          font-family:Arial;
+          color:#000;
+          padding:18px;
+        }
+
+        h2{
+          text-align:center;
+          margin-bottom:5px;
+        }
+
+        .center{
+          text-align:center;
+        }
+
+        .line{
+          border-top:1px dashed #000;
+          margin:10px 0;
+        }
+
+        table{
+          width:100%;
+          border-collapse:collapse;
+          font-size:12px;
+        }
+
+        td{
+          padding:5px 1px;
+          border-bottom:1px solid #ddd;
+        }
+
+        .total{
+          font-size:20px;
+          font-weight:bold;
+        }
+
+      </style>
+
+    </head>
+
+    <body>
+
+      <h2>C1 PLAYSTATION</h2>
+
+      <div class="center">
+        ${esc(f.room.name)}
+      </div>
+
+      <div class="center">
+        ${formatTime(f.seconds)}
+      </div>
+
+      <div class="line"></div>
+
+      <b>PlayStation:</b>
+      ${money(f.roomAmount)}
+
+      <div style="margin-top:8px">
+        <b>Bar:</b>
+        ${money(f.barAmount)}
+      </div>
+
+      <div class="line"></div>
+
+      <table>
+        ${rows}
+      </table>
+
+      <div class="line"></div>
+
+      <div class="total">
+        ЖАМИ:
+        ${money(f.total)}
+      </div>
+
+      <div style="margin-top:7px">
+        Тўлов:
+        ${
+          paymentMethod === "cash"
+          ? "НАҚД"
+          : "ПЛАСТИК"
+        }
+      </div>
+
+      <div style="margin-top:20px;text-align:center">
+        Раҳмат!
+      </div>
+
+      <script>
+        window.onload=function(){
+          window.print();
+        }
+      <\/script>
+
+    </body>
+
+    </html>
+
+  `);
+
+  w.document.close();
+}
+
+
+/* =====================================================
+   BAR PAGE
+===================================================== */
+
+function stockClass(stock){
+
+  stock =
+    Number(stock || 0);
+
+  if(stock < 5)
+    return "stock-red";
+
+  if(stock <= 10)
+    return "stock-yellow";
+
+  return "stock-green";
+}
+
+
+function renderProducts(){
+
+  const box =
+    document.getElementById(
+      "products"
+    );
+
+  if(!box)
+    return;
+
+  if(!products.length){
+
+    box.innerHTML =
+      `<div class="empty">
+        Барда маҳсулот йўқ
+      </div>`;
+
+    return;
+  }
+
+
+  box.innerHTML =
+    products.map(p=>{
+
+      const stock =
+        Number(p.stock || 0);
+
+      const profit =
+        Number(p.sell_price || 0) -
+        Number(p.buy_price || 0);
+
+      const img =
+        p.image ||
+        "";
+
+      return `
+
+        <div class="product">
+
+          <div class="product-top">
+
+            ${
+              img
+              ?
+              `
+                <img
+                  class="product-img"
+                  src="${esc(img)}"
+                  onerror="this.style.display='none'"
+                >
+              `
+              :
+              `
+                <div
+                  class="product-img"
+                  style="
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:20px;
+                  "
+                >
+                  🥤
+                </div>
+              `
+            }
+
+            <div class="product-main">
+
+              <div class="product-name">
+                ${esc(p.name)}
+              </div>
+
+              <div class="product-price">
+                Олиш:
+                ${money(p.buy_price)}
+              </div>
+
+              <div class="product-price">
+                Сотиш:
+                ${money(p.sell_price)}
+              </div>
+
+            </div>
+
+            <div
+              class="stock-dot ${stockClass(stock)}"
+            >
+              ${stock}
+            </div>
+
+          </div>
+
+          <div class="product-profit">
+            Соф фойда:
+            ${money(profit)} / дона
+          </div>
+
+          <div class="product-actions">
+
+            <button
+              class="product-action edit"
+              onclick="editProduct(${p.id})"
+            >
+              ✏️ Ўзгартириш
+            </button>
+
+            <button
+              class="product-action delete"
+              onclick="deleteProduct(${p.id})"
+            >
+              🗑️
+            </button>
+
+          </div>
+
+        </div>
+
+      `;
+
+    }).join("");
+}
+
+
+/* =====================================================
+   PRODUCT MODAL
+===================================================== */
+
+function openProductModal(){
+
+  editingProduct = null;
+
+  document.getElementById(
+    "productModalTitle"
+  ).textContent =
+    "Маҳсулот қўшиш";
+
+  document.getElementById(
+    "pName"
+  ).value = "";
+
+  document.getElementById(
+    "pBuy"
+  ).value = "";
+
+  document.getElementById(
+    "pSell"
+  ).value = "";
+
+  document.getElementById(
+    "pStock"
+  ).value = "";
+
+  document.getElementById(
+    "pImage"
+  ).value = "";
+
+  document
+    .getElementById(
+      "productModal"
+    )
+    .classList.add("show");
+}
+
+
+function closeProductModal(){
+
+  document
+    .getElementById(
+      "productModal"
+    )
+    .classList.remove("show");
+}
+
+
+function editProduct(id){
+
+  const p =
+    products.find(
+      x =>
+      Number(x.id) ===
+      Number(id)
+    );
+
+  if(!p)
+    return;
+
+  editingProduct =
+    p;
+
+  document.getElementById(
+    "productModalTitle"
+  ).textContent =
+    "Маҳсулотни ўзгартириш";
+
+  document.getElementById(
+    "pName"
+  ).value =
+    p.name || "";
+
+  document.getElementById(
+    "pBuy"
+  ).value =
+    p.buy_price || 0;
+
+  document.getElementById(
+    "pSell"
+  ).value =
+    p.sell_price || 0;
+
+  document.getElementById(
+    "pStock"
+  ).value =
+    p.stock || 0;
+
+  document.getElementById(
+    "pImage"
+  ).value =
+    p.image || "";
+
+  document
+    .getElementById(
+      "productModal"
+    )
+    .classList.add("show");
+}
+
+
+async function saveProduct(){
+
+  const name =
+    document.getElementById(
+      "pName"
+    ).value.trim();
+
+  const buy =
+    Number(
+      document.getElementById(
+        "pBuy"
+      ).value || 0
+    );
+
+  const sell =
+    Number(
+      document.getElementById(
+        "pSell"
+      ).value || 0
+    );
+
+  const stock =
+    Number(
+      document.getElementById(
+        "pStock"
+      ).value || 0
+    );
+
+  const image =
+    document.getElementById(
+      "pImage"
+    ).value.trim();
+
+
+  if(!name){
+
+    toast(
+      "Маҳсулот номини киритинг"
+    );
+
+    return;
+  }
+
+
+  const payload = {
+
+    name:name,
+
+    buy_price:buy,
+
+    sell_price:sell,
+
+    stock:stock,
+
+    image:
+      image || null
+
+  };
+
+
+  let result;
+
+
+  if(editingProduct){
+
+    result =
+      await db
+        .from("products")
+        .update(payload)
+        .eq(
+          "id",
+          editingProduct.id
+        );
+
+  }else{
+
+    result =
+      await db
+        .from("products")
+        .insert(payload);
+
+  }
+
+
+  if(result.error){
+
+    toast(
+      "Сақлашда хато: " +
+      result.error.message
+    );
+
+    return;
+  }
+
+
+  closeProductModal();
+
+  await loadData();
+
+  toast(
+    "Маҳсулот сақланди"
+  );
+}
+
+
+async function deleteProduct(id){
+
+  const p =
+    products.find(
+      x =>
+      Number(x.id) ===
+      Number(id)
+    );
+
+  if(!p)
+    return;
+
+  if(
+    !confirm(
+      `${p.name} ўчирилсинми?`
+    )
+  )
+    return;
+
+
+  const {error} =
+    await db
+      .from("products")
+      .delete()
+      .eq(
+        "id",
+        id
+      );
+
+
+  if(error){
+
+    toast(
+      "Ўчиришда хато"
+    );
+
+    return;
+  }
+
+
+  await loadData();
+
+  toast(
+    "Маҳсулот ўчирилди"
+  );
+}
+
+
+/* =====================================================
+   ROOM MENU
+===================================================== */
+
+function roomMenu(
+  event,
+  id
+){
+
+  event.stopPropagation();
+
+  const room =
+    rooms.find(
+      x =>
+      Number(x.id) ===
+      Number(id)
+    );
+
+  if(!room)
+    return;
+
+  editingRoom =
+    room;
+
+  document.getElementById(
+    "roomNameInput"
+  ).value =
+    room.name;
+
+  document.getElementById(
+    "roomTypeInput"
+  ).value =
+    room.type || "PS4";
+
+  document.getElementById(
+    "roomPriceInput"
+  ).value =
+    room.price_per_hour;
+
+  document
+    .getElementById(
+      "roomModal"
+    )
+    .classList.add("show");
+}
+
+
+function closeRoomModal(){
+
+  document
+    .getElementById(
+      "roomModal"
+    )
+    .classList.remove("show");
+
+  editingRoom = null;
+}
+
+
+async function saveRoom(){
+
+  if(!editingRoom)
+    return;
+
+  const name =
+    document.getElementById(
+      "roomNameInput"
+    ).value.trim();
+
+  const type =
+    document.getElementById(
+      "roomTypeInput"
+    ).value;
+
+  const price =
+    Number(
+      document.getElementById(
+        "roomPriceInput"
+      ).value
+    );
+
+
+  if(!name || !price){
+
+    toast(
+      "Маълумотларни тўлдиринг"
+    );
+
+    return;
+  }
+
+
+  const {error} =
+    await db
+      .from("rooms")
+      .update({
+
+        name:name,
+
+        type:type,
+
+        price_per_hour:price
+
+      })
+      .eq(
+        "id",
+        editingRoom.id
+      );
+
+
+  if(error){
+
+    toast(
+      "Хона сақланмади"
+    );
+
+    return;
+  }
+
+
+  closeRoomModal();
+
+  await loadData();
+
+  toast(
+    "Хона сақланди"
+  );
+}
+
+
+async function deleteRoom(){
+
+  if(!editingRoom)
+    return;
+
+  if(
+    activeSession(
+      editingRoom.id
+    )
+  ){
+
+    toast(
+      "Банд хонани ўчириб бўлмайди"
+    );
+
+    return;
+  }
+
+
+  if(
+    !confirm(
+      `${editingRoom.name} ўчирилсинми?`
+    )
+  )
+    return;
+
+
+  const {error} =
+    await db
+      .from("rooms")
+      .delete()
+      .eq(
+        "id",
+        editingRoom.id
+      );
+
+
+  if(error){
+
+    toast(
+      "Хона ўчирилмади"
+    );
+
+    return;
+  }
+
+
+  closeRoomModal();
+
+  await loadData();
+
+  toast(
+    "Хона ўчирилди"
+  );
+}
+
+
+/* =====================================================
+   ADD ROOM
+===================================================== */
+
+async function addRoom(){
+
+  const name =
+    prompt(
+      "Янги хона номи:",
+      `${rooms.length+1}-хона`
+    );
+
+  if(!name)
+    return;
+
+  const type =
+    prompt(
+      "PS тури:",
+      "PS4"
+    ) || "PS4";
+
+  const defaultPrice =
+    type.toUpperCase() === "PS3"
+    ? 15000
+    : 20000;
+
+  const price =
+    Number(
+      prompt(
+        "1 соат нархи:",
+        defaultPrice
+      )
+    );
+
+  if(!price)
+    return;
+
+
+  const {error} =
+    await db
+      .from("rooms")
+      .insert({
+
+        name:name,
+
+        type:type,
+
+        price_per_hour:price,
+
+        status:"free"
+
+      });
+
+
+  if(error){
+
+    toast(
+      "Хона қўшилмади"
+    );
+
+    return;
+  }
+
+
+  await loadData();
+
+  toast(
+    "Хона қўшилди"
+  );
+}
+
+
+/* =====================================================
+   REPORTS
+===================================================== */
+
+function getTodaySessions(){
+
+  return sessions.filter(
+    s =>
+    s.status === "finished" &&
+    s.end_time &&
+    new Date(s.end_time) >=
+    startOfToday()
+  );
+}
+
+
+function renderReports(){
+
+  const list =
+    getTodaySessions();
+
+
+  const revenue =
+    list.reduce(
+      (sum,s)=>
+        sum +
+        Number(s.total_amount || 0),
+      0
+    );
+
+  const ps =
+    list.reduce(
+      (sum,s)=>
+        sum +
+        Number(s.room_amount || 0),
+      0
+    );
+
+  const bar =
+    list.reduce(
+      (sum,s)=>
+        sum +
+        Number(s.bar_amount || 0),
+      0
+    );
+
+  const profit =
+    list.reduce(
+      (sum,s)=>
+        sum +
+        Number(s.room_amount || 0) +
+        Number(s.bar_profit || 0),
+      0
+    );
+
+
+  document.getElementById(
+    "rRevenue"
+  ).textContent =
+    money(revenue);
+
+  document.getElementById(
+    "rPS"
+  ).textContent =
+    money(ps);
+
+  document.getElementById(
+    "rBar"
+  ).textContent =
+    money(bar);
+
+  document.getElementById(
+    "rProfit"
+  ).textContent =
+    money(profit);
+
+
+  document.getElementById(
+    "dailyRoomsCount"
+  ).textContent =
+    list.length;
+
+  document.getElementById(
+    "dailyRevenueMini"
+  ).textContent =
+    money(revenue);
+
+  document.getElementById(
+    "dailyProfitMini"
+  ).textContent =
+    money(profit);
+
+
+  const box =
+    document.getElementById(
+      "reportsList"
+    );
+
+
+  if(!list.length){
+
+    box.innerHTML =
+      `<div class="empty">
+        Бугун якунланган хона йўқ
+      </div>`;
+
+    return;
+  }
+
+
+  box.innerHTML =
+    list.map(s=>{
+
+      const room =
+        rooms.find(
+          r =>
+          Number(r.id) ===
+          Number(s.room_id)
+        );
+
+
+      return `
+
+        <div
+          class="screen-box"
+          style="margin-bottom:7px"
+        >
+
+          <div class="screen-row">
+
+            <span>
+              🎮 ${
+                esc(
+                  room?.name ||
+                  "Хона"
+                )
+              }
+            </span>
+
+            <b>
+              ${money(
+                s.total_amount
+              )}
+            </b>
+
+          </div>
+
+          <div class="screen-row">
+
+            <span>
+              🎮 PlayStation
+            </span>
+
+            <b>
+              ${money(
+                s.room_amount
+              )}
+            </b>
+
+          </div>
+
+          <div class="screen-row">
+
+            <span>
+              🥤 Бар
+            </span>
+
+            <b>
+              ${money(
+                s.bar_amount
+              )}
+            </b>
+
+          </div>
+
+          <div class="screen-row">
+
+            <span>
+              💚 Соф фойда
+            </span>
+
+            <b style="color:#54dc8d">
+              ${money(
+                Number(s.room_amount || 0) +
+                Number(s.bar_profit || 0)
+              )}
+            </b>
+
+          </div>
+
+          <div
+            style="
+              color:#727f8f;
+              font-size:9px;
+              margin-top:6px
+            "
+          >
+            ${
+              new Date(
+                s.end_time
+              ).toLocaleString(
+                "uz-UZ"
+              )
+            }
+          </div>
+
+        </div>
+
+      `;
+
+    }).join("");
+}
+
+
+/* =====================================================
+   DAILY REPORT OPEN
+===================================================== */
+
+function openDailyReport(){
+
+  const list =
+    getTodaySessions();
+
+  const revenue =
+    list.reduce(
+      (sum,s)=>
+        sum +
+        Number(s.total_amount || 0),
+      0
+    );
+
+  const ps =
+    list.reduce(
+      (sum,s)=>
+        sum +
+        Number(s.room_amount || 0),
+      0
+    );
+
+  const bar =
+    list.reduce(
+      (sum,s)=>
+        sum +
+        Number(s.bar_amount || 0),
+      0
+    );
+
+  const profit =
+    list.reduce(
+      (sum,s)=>
+        sum +
+        Number(s.room_amount || 0) +
+        Number(s.bar_profit || 0),
+      0
+    );
+
+  const cash =
+    list.reduce(
+      (sum,s)=>{
+        return sum;
+      },
+      0
+    );
+
+  document.getElementById(
+    "dailyReportContent"
+  ).innerHTML = `
+
+    <div class="screen-box">
+
+      <div class="screen-row">
+        <span>📅 Сана</span>
+        <b>
+          ${new Date().toLocaleDateString("uz-UZ")}
+        </b>
+      </div>
+
+      <div class="screen-row">
+        <span>🎮 Якунланган хоналар</span>
+        <b>${list.length} та</b>
+      </div>
+
+      <div class="screen-row">
+        <span>🎮 PlayStation</span>
+        <b>${money(ps)}</b>
+      </div>
+
+      <div class="screen-row">
+        <span>🥤 Бар</span>
+        <b>${money(bar)}</b>
+      </div>
+
+      <div class="screen-row">
+        <span>💰 Жами тушум</span>
+        <b>${money(revenue)}</b>
+      </div>
+
+      <div class="screen-row">
+        <span>💚 Соф фойда</span>
+        <b style="color:#54dc8d">
+          ${money(profit)}
+        </b>
+      </div>
+
+    </div>
+
+    <div class="section">
+      Бугунги хоналар
+    </div>
+
+    ${
+      list.length
+      ?
+      list.map(s=>{
+
+        const room =
+          rooms.find(
+            r =>
+            Number(r.id) ===
+            Number(s.room_id)
+          );
+
+        return `
+
+          <div class="screen-box">
+
+            <div class="screen-row">
+
+              <span>
+                🎮 ${
+                  esc(
+                    room?.name ||
+                    "Хона"
+                  )
+                }
+              </span>
+
+              <b>
+                ${money(
+                  s.total_amount
+                )}
+              </b>
+
+            </div>
+
+            <div class="screen-row">
+              <span>Вақт</span>
+              <b>
+                ${formatTime(
+                  s.total_time
+                )}
+              </b>
+            </div>
+
+            <div class="screen-row">
+              <span>PlayStation</span>
+              <b>
+                ${money(
+                  s.room_amount
+                )}
+              </b>
+            </div>
+
+            <div class="screen-row">
+              <span>Бар</span>
+              <b>
+                ${money(
+                  s.bar_amount
+                )}
+              </b>
+            </div>
+
+          </div>
+
+        `;
+
+      }).join("")
+      :
+      `
+        <div class="empty">
+          Бугун ҳали якунланган хона йўқ
+        </div>
+      `
+    }
+
+  `;
+
+  document
+    .getElementById(
+      "dailyReportModal"
+    )
+    .classList.add("show");
+}
+
+
+function closeDailyReport(){
+
+  document
+    .getElementById(
+      "dailyReportModal"
+    )
+    .classList.remove("show");
+}
+
+
+/* =====================================================
+   BACK
+===================================================== */
+
+function goBackRooms(){
+
+  currentRoom = null;
+  currentSession = null;
+  currentSessionProducts = [];
+
+  showPage(
+    "playstation"
+  );
+}
+
+
+/* =====================================================
+   REALTIME
+===================================================== */
+
+function setupRealtime(){
+
+  db
+    .channel("c1-playstation-live")
+
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"rooms"
+      },
+      async ()=>{
+        await loadData();
+
+        if(currentSession){
+          renderRoomScreen();
+        }
+      }
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"sessions"
+      },
+      async ()=>{
+        await loadData();
+
+        if(currentSession){
+
+          await loadSessionProducts();
+
+          renderRoomScreen();
+        }
+      }
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"session_products"
+      },
+      async ()=>{
+
+        await loadData();
+
+        if(currentSession){
+
+          await loadSessionProducts();
+
+          renderSessionProducts();
+
+          renderRoomProducts();
+
+          updateRoomScreen();
+
+          updateAllRoomCards();
+        }
+      }
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"products"
+      },
+      async ()=>{
+
+        await loadData();
+
+        if(
+          document
+            .getElementById(
+              "roomBarModal"
+            )
+            .classList.contains("show")
+        ){
+
+          renderRoomProducts();
+        }
+      }
+    )
+
+    .subscribe();
+}
+
+
+/* =====================================================
+   LIVE TIMER
+===================================================== */
+
+setInterval(async ()=>{
+
+  if(
+    currentSession &&
+    currentRoom
+  ){
+
+    updateRoomScreen();
+
+  }
+
+  document
+    .querySelectorAll(
+      "[data-room-time]"
+    )
+    .forEach(el=>{
+
+      const id =
+        el.dataset.roomTime;
+
+      const s =
+        activeSession(id);
+
+      if(s){
+
+        el.textContent =
+          formatTime(
+            elapsedSeconds(s)
+          );
+      }
+
+    });
+
+
+  /*
+    Ҳар секундда хона пулини ҳисоблаймиз.
+  */
+
+  document
+    .querySelectorAll(
+      "[data-room-money]"
+    )
+    .forEach(el=>{
+
+      const id =
+        el.dataset.roomMoney;
+
+      const s =
+        activeSession(id);
+
+      const room =
+        rooms.find(
+          r =>
+          Number(r.id) ===
+          Number(id)
+        );
+
+      if(s && room){
+
+        el.textContent =
+          money(
+            roomAmount(
+              s,
+              room
+            )
+          );
+      }
+
+    });
+
+
+  /*
+    Жами суммани ҳам янгилаймиз.
+    Бар суммаси ҳар 2 секундда
+    сервердан текширилади.
+  */
+
+  renderHome();
+
+},1000);
+
+
+/* =====================================================
+   ROOM BAR REFRESH
+===================================================== */
+
+setInterval(async ()=>{
+
+  if(
+    document
+      .getElementById(
+        "playstation"
+      )
+      .classList
+      .contains("active")
+  ){
+
+    await updateAllRoomCards();
+
+  }
+
+},2000);
+
+
+/* =====================================================
+   BACKUP SYNC
+===================================================== */
+
+setInterval(
+  ()=>loadData(),
+  8000
+);
+
+
+/* =====================================================
+   START
+===================================================== */
+
+async function startApp(){
+
+  await loadData();
+
+  setupRealtime();
+
+}
+
+startApp();
+
+</script>
+
+</body>
+    </html>
